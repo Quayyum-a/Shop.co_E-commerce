@@ -1,7 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react'
+import { useSelector, useDispatch } from 'react-redux'
+import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react'
+import { initializeAuth } from '../store/slices/authSlice'
+import AuthModal from './AuthModal'
+import UserProfile from './UserProfile'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -126,4 +129,3 @@ const Header = () => {
 }
 
 export default Header
-
