@@ -78,73 +78,142 @@ const AccountPage = () => {
           </div>
         </div>
 
-        {/* Account Options Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {accountOptions.map((option) => {
-            const IconComponent = option.icon
-            return (
-              <Link
-                key={option.title}
-                to={option.href}
-                className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-200 group"
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-lg shadow-sm mb-8">
+          <div className="border-b border-gray-200">
+            <nav className="flex space-x-8 px-6">
+              <button
+                onClick={() => setActiveTab('overview')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'overview'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
               >
-                <div className="flex items-start space-x-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
-                      <IconComponent size={24} />
+                Overview
+              </button>
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'orders'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Order History
+              </button>
+              <button
+                onClick={() => setActiveTab('wishlist')}
+                className={`py-4 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === 'wishlist'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Wishlist
+              </button>
+            </nav>
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        <div className="bg-white rounded-lg shadow-sm p-6">
+          {activeTab === 'overview' && (
+            <div>
+              {/* Account Options Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                {accountOptions.map((option) => {
+                  const IconComponent = option.icon
+                  return (
+                    <button
+                      key={option.title}
+                      onClick={() => {
+                        if (option.href === '#orders') {
+                          setActiveTab('orders')
+                        } else if (option.href === '#wishlist') {
+                          setActiveTab('wishlist')
+                        }
+                      }}
+                      className="bg-gray-50 rounded-lg p-6 hover:bg-gray-100 transition-colors border border-gray-200 group w-full text-left"
+                    >
+                      <div className="flex items-start space-x-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                            <IconComponent size={24} />
+                          </div>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-medium text-gray-900 mb-1">
+                            {option.title}
+                          </h3>
+                          <p className="text-gray-600 text-sm">
+                            {option.description}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+
+              {/* Quick Stats */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                      <p className="text-2xl font-bold text-gray-900">0</p>
                     </div>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-lg font-medium text-gray-900 mb-1">
-                      {option.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm">
-                      {option.description}
-                    </p>
+                    <Package size={32} className="text-gray-400" />
                   </div>
                 </div>
+
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Wishlist Items</p>
+                      <p className="text-2xl font-bold text-gray-900">0</p>
+                    </div>
+                    <Heart size={32} className="text-gray-400" />
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">Member Since</p>
+                      <p className="text-lg font-semibold text-gray-900">
+                        {new Date(user?.dateJoined).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long'
+                        })}
+                      </p>
+                    </div>
+                    <User size={32} className="text-gray-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'orders' && <OrderHistory />}
+
+          {activeTab === 'wishlist' && (
+            <div className="text-center py-12">
+              <Heart size={48} className="text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
+              <p className="text-gray-600 mb-6">Save items you love for later</p>
+              <Link
+                to="/shop"
+                className="bg-black text-white px-6 py-3 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+              >
+                Browse Products
               </Link>
-            )
-          })}
+            </div>
+          )}
         </div>
 
-        {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Orders</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
-              </div>
-              <Package size={32} className="text-gray-400" />
-            </div>
-          </div>
 
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Wishlist Items</p>
-                <p className="text-2xl font-bold text-gray-900">0</p>
-              </div>
-              <Heart size={32} className="text-gray-400" />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Member Since</p>
-                <p className="text-lg font-semibold text-gray-900">
-                  {new Date(user?.dateJoined).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long'
-                  })}
-                </p>
-              </div>
-              <User size={32} className="text-gray-400" />
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
