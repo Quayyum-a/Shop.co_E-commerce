@@ -198,13 +198,13 @@ const ProductDetailPage = () => {
             
             <div className="flex items-center mb-4">
               {[...Array(5)].map((_, i) => (
-                <Star 
-                  key={i} 
-                  size={20} 
-                  className={`${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+                <Star
+                  key={i}
+                  size={20}
+                  className={`${i < Math.floor(product.rating?.rate || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
                 />
               ))}
-              <span className="text-sm text-gray-600 ml-2">{product.rating}/5</span>
+              <span className="text-sm text-gray-600 ml-2">{product.rating?.rate || 4}/5</span>
             </div>
 
             <div className="flex items-center space-x-4 mb-6">
