@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { Link } from 'react-router-dom'
 import { User, Package, Heart, Settings, CreditCard, MapPin } from 'lucide-react'
+import OrderHistory from '../components/OrderHistory'
 
 const AccountPage = () => {
   const { user } = useSelector(state => state.auth)
