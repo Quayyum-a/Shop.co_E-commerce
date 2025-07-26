@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'
 import Layout from './components/Layout'
+import ProtectedRoute from './components/ProtectedRoute'
 import HomePage from './pages/HomePage'
 import ShopPage from './pages/ShopPage'
 import SalePage from './pages/SalePage'
@@ -9,6 +10,7 @@ import SearchResultsPage from './pages/SearchResultsPage'
 import CategoryPage from './pages/CategoryPage'
 import ProductDetailPage from './pages/ProductDetailPage'
 import CartPage from './pages/CartPage'
+import AccountPage from './pages/AccountPage'
 import './App.css'
 
 function App() {
