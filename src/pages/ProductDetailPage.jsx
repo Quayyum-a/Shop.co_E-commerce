@@ -209,16 +209,6 @@ const ProductDetailPage = () => {
 
             <div className="flex items-center space-x-4 mb-6">
               <span className="text-3xl font-bold">${product.price}</span>
-              {product.discountPercentage > 0 && (
-                <>
-                  <span className="text-xl text-gray-500 line-through">
-                    ${(product.price * (1 + product.discountPercentage / 100)).toFixed(2)}
-                  </span>
-                  <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">
-                    -{Math.round(product.discountPercentage)}%
-                  </span>
-                </>
-              )}
             </div>
 
             <p className="text-gray-600 mb-6 leading-relaxed">
