@@ -123,12 +123,21 @@ const Header = () => {
                       <div className="py-2">
                         <button
                           onClick={() => {
+                            setShowUserDropdown(false)
+                            navigate('/account')
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          My Account
+                        </button>
+                        <button
+                          onClick={() => {
                             setIsProfileOpen(true)
                             setShowUserDropdown(false)
                           }}
                           className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
                         >
-                          My Profile
+                          Edit Profile
                         </button>
                         <button
                           onClick={() => {
