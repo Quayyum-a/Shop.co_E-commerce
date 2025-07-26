@@ -75,7 +75,7 @@ const ProductDetailPage = () => {
         id: product.id,
         title: product.title,
         price: product.price,
-        image: product.thumbnail,
+        image: product.image,
         size: selectedSize,
         color: selectedColor
       }))
