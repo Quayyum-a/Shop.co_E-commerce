@@ -190,6 +190,26 @@ const Header = () => {
           </div>
         )}
       </header>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* User Profile Modal */}
+      <UserProfile
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
+
+      {/* Click outside handler for dropdown */}
+      {showUserDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowUserDropdown(false)}
+        />
+      )}
     </>
   )
 }
