@@ -143,7 +143,7 @@ const ProductDetailPage = () => {
     )
   }
 
-  const images = product.images || [product.thumbnail]
+  const images = [product.image] // FakeStore API only has one image per product
 
   return (
     <div className="min-h-screen bg-white">
