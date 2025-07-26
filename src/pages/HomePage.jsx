@@ -3,7 +3,11 @@ import { Star, ArrowRight } from 'lucide-react'
 import { useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 
 const HomePage = () => {
-  const { data: productsData, isLoading } = useGetProductsQuery({ limit: 8 })
+  const { data: menProducts, isLoading: loadingMen } = useGetFakeStoreProductsQuery({ category: "men's clothing", limit: 4 })
+  const { data: womenProducts, isLoading: loadingWomen } = useGetFakeStoreProductsQuery({ category: "women's clothing", limit: 4 })
+
+  const isLoading = loadingMen || loadingWomen
+  const allProducts = [...(menProducts || []), ...(womenProducts || [])]
 
   const heroStats = [
     { number: '200+', label: 'International Brands' },
