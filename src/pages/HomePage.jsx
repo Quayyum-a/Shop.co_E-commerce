@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Star, ArrowRight } from 'lucide-react'
-import { useGetProductsQuery } from '../store/api/dummyJsonApi'
+import { useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 
 const HomePage = () => {
   const { data: productsData, isLoading } = useGetProductsQuery({ limit: 8 })
@@ -258,4 +258,3 @@ const HomePage = () => {
 }
 
 export default HomePage
-
