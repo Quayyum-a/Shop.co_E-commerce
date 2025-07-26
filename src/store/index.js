@@ -2,10 +2,12 @@ import { configureStore } from '@reduxjs/toolkit'
 import { setupListeners } from '@reduxjs/toolkit/query'
 import { fakeStoreApi } from './api/fakeStoreApi'
 import cartReducer from './slices/cartSlice'
+import authReducer from './slices/authSlice'
 
 export const store = configureStore({
   reducer: {
     cart: cartReducer,
+    auth: authReducer,
     [fakeStoreApi.reducerPath]: fakeStoreApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
