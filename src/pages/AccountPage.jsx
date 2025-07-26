@@ -6,6 +6,7 @@ import OrderHistory from '../components/OrderHistory'
 
 const AccountPage = () => {
   const { user } = useSelector(state => state.auth)
+  const [activeTab, setActiveTab] = useState('overview')
 
   const accountOptions = [
     {
