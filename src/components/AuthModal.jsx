@@ -8,7 +8,14 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const dispatch = useDispatch()
-  const { isLoading, error } = useSelector(state => state.auth)
+  const { isLoading, error, isAuthenticated } = useSelector(state => state.auth)
+
+  // Close modal when authentication is successful
+  useEffect(() => {
+    if (isAuthenticated) {
+      handleClose()
+    }
+  }, [isAuthenticated])
 
   const [formData, setFormData] = useState({
     email: '',
