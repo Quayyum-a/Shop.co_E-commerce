@@ -8,8 +8,8 @@ import { addToCart } from '../store/slices/cartSlice'
 const ProductDetailPage = () => {
   const { id } = useParams()
   const dispatch = useDispatch()
-  const { data: product, isLoading } = useGetProductByIdQuery(id)
-  const { data: relatedProducts } = useGetProductsQuery({ limit: 4 })
+  const { data: product, isLoading } = useGetFakeStoreProductByIdQuery(id)
+  const { data: relatedProducts } = useGetFakeStoreProductsQuery({ limit: 4 })
   
   const [selectedImage, setSelectedImage] = useState(0)
   const [selectedSize, setSelectedSize] = useState('Large')
