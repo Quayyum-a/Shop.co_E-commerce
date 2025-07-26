@@ -9,8 +9,19 @@ import UserProfile from './UserProfile'
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [showUserDropdown, setShowUserDropdown] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
   const cartItems = useSelector(state => state.cart.totalQuantity)
+  const { user, isAuthenticated } = useSelector(state => state.auth)
+
+  // Initialize auth on component mount
+  useEffect(() => {
+    dispatch(initializeAuth())
+  }, [dispatch])
 
   const handleSearch = (e) => {
     e.preventDefault()
