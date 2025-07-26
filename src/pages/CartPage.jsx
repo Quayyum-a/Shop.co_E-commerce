@@ -155,10 +155,13 @@ const CartPage = () => {
               </div>
 
               {/* Checkout Button */}
-              <button className="w-full bg-black text-white py-3 px-6 rounded-full font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2">
+              <Link
+                to="/checkout"
+                className="w-full bg-black text-white py-3 px-6 rounded-full font-medium hover:bg-gray-800 transition-colors flex items-center justify-center space-x-2"
+              >
                 <span>Go to Checkout</span>
                 <ArrowRight size={16} />
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -168,4 +171,3 @@ const CartPage = () => {
 }
 
 export default CartPage
-
