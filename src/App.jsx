@@ -26,6 +26,11 @@ function App() {
         <Route path="/category/:category" element={<CategoryPage />} />
         <Route path="/product/:id" element={<ProductDetailPage />} />
         <Route path="/cart" element={<CartPage />} />
+        <Route path="/checkout" element={
+          <ProtectedRoute>
+            <CheckoutPage />
+          </ProtectedRoute>
+        } />
         <Route path="/search" element={<SearchResultsPage />} />
         <Route path="/account" element={
           <ProtectedRoute>
