@@ -85,31 +85,25 @@ const ProductDetailPage = () => {
   const ProductCard = ({ product }) => (
     <Link to={`/product/${product.id}`} className="group">
       <div className="bg-gray-100 rounded-lg overflow-hidden mb-3">
-        <img 
-          src={product.thumbnail} 
+        <img
+          src={product.image}
           alt={product.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
-      <h3 className="font-medium text-gray-900 mb-1">{product.title}</h3>
+      <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
       <div className="flex items-center mb-2">
         {[...Array(5)].map((_, i) => (
-          <Star 
-            key={i} 
-            size={16} 
-            className={`${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          <Star
+            key={i}
+            size={16}
+            className={`${i < Math.floor(product.rating?.rate || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
           />
         ))}
-        <span className="text-sm text-gray-600 ml-2">{product.rating}/5</span>
+        <span className="text-sm text-gray-600 ml-2">{product.rating?.rate || 4}/5</span>
       </div>
       <div className="flex items-center space-x-2">
         <span className="font-bold text-lg">${product.price}</span>
-        {product.discountPercentage > 0 && (
-          <>
-            <span className="text-gray-500 line-through">${(product.price * (1 + product.discountPercentage / 100)).toFixed(2)}</span>
-            <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">-{Math.round(product.discountPercentage)}%</span>
-          </>
-        )}
       </div>
     </Link>
   )
