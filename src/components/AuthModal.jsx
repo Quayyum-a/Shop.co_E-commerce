@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { X, Eye, EyeOff, User, Mail, Phone, Lock } from 'lucide-react'
 import { loginUser, registerUser, clearError } from '../store/slices/authSlice'
