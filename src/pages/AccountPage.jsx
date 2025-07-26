@@ -1,0 +1,150 @@
+import { useSelector } from 'react-redux'
+import { Link } from 'react-router-dom'
+import { User, Package, Heart, Settings, CreditCard, MapPin } from 'lucide-react'
+
+const AccountPage = () => {
+  const { user } = useSelector(state => state.auth)
+
+  const accountOptions = [
+    {
+      icon: User,
+      title: 'Profile Information',
+      description: 'Update your personal details and preferences',
+      href: '#profile'
+    },
+    {
+      icon: Package,
+      title: 'Order History',
+      description: 'View and track your recent orders',
+      href: '#orders'
+    },
+    {
+      icon: Heart,
+      title: 'Wishlist',
+      description: 'Manage your saved items',
+      href: '#wishlist'
+    },
+    {
+      icon: MapPin,
+      title: 'Addresses',
+      description: 'Manage shipping and billing addresses',
+      href: '#addresses'
+    },
+    {
+      icon: CreditCard,
+      title: 'Payment Methods',
+      description: 'Manage your saved payment methods',
+      href: '#payment'
+    },
+    {
+      icon: Settings,
+      title: 'Account Settings',
+      description: 'Privacy, security, and notification preferences',
+      href: '#settings'
+    }
+  ]
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Breadcrumbs */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 py-4">
+          <nav className="flex items-center space-x-2 text-sm">
+            <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-gray-900 font-medium">My Account</span>
+          </nav>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
+          <div className="flex items-center space-x-4">
+            <div className="w-16 h-16 bg-black text-white rounded-full flex items-center justify-center font-bold text-xl">
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">
+                Welcome back, {user?.firstName}!
+              </h1>
+              <p className="text-gray-600">
+                Manage your account and track your orders
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Account Options Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {accountOptions.map((option) => {
+            const IconComponent = option.icon
+            return (
+              <Link
+                key={option.title}
+                to={option.href}
+                className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition-shadow border border-gray-200 group"
+              >
+                <div className="flex items-start space-x-4">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-black group-hover:text-white transition-colors">
+                      <IconComponent size={24} />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">
+                      {option.title}
+                    </h3>
+                    <p className="text-gray-600 text-sm">
+                      {option.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+
+        {/* Quick Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Orders</p>
+                <p className="text-2xl font-bold text-gray-900">0</p>
+              </div>
+              <Package size={32} className="text-gray-400" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Wishlist Items</p>
+                <p className="text-2xl font-bold text-gray-900">0</p>
+              </div>
+              <Heart size={32} className="text-gray-400" />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Member Since</p>
+                <p className="text-lg font-semibold text-gray-900">
+                  {new Date(user?.dateJoined).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long'
+                  })}
+                </p>
+              </div>
+              <User size={32} className="text-gray-400" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default AccountPage
