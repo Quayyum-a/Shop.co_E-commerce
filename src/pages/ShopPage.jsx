@@ -1,80 +1,41 @@
-import { useState, useEffect } from 'react'
-import { useParams, useSearchParams, Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Filter, ChevronDown, Star } from 'lucide-react'
 import { useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 import FiltersSidebar from '../components/FiltersSidebar'
 
-const CategoryPage = () => {
-  const { category } = useParams()
-  const [searchParams] = useSearchParams()
-  const searchQuery = searchParams.get('q')
-  
+const ShopPage = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [sortBy, setSortBy] = useState('Most Popular')
   const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState({})
+  const [selectedCategory, setSelectedCategory] = useState('all')
 
-  // Determine which API call to make
-  const shouldSearch = !!searchQuery
-  const shouldFilterByCategory = !!category && category !== 'shop'
-
-  // Map category names to API categories
-  const getCategoryName = (cat) => {
-    const categoryMap = {
-      'mens': "men's clothing",
-      'womens': "women's clothing",
-      'casual': "men's clothing",
-      'formal': "men's clothing",
-      'party': "women's clothing",
-      'gym': "men's clothing"
-    }
-    return categoryMap[cat] || cat
-  }
-
-  const { data: productsData, isLoading } = useGetFakeStoreProductsQuery(
-    {
-      limit: 20,
-      category: shouldFilterByCategory ? getCategoryName(category) : ''
-    }
-  )
-
-  // For search, we'll filter products client-side since FakeStore API doesn't have search
-  const searchData = searchQuery ? {
-    products: productsData?.filter(product =>
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || []
-  } : null
-
-  const products = shouldSearch ? searchData?.products : productsData
-  const totalProducts = products?.length || 0
-  const loading = isLoading
+  const { data: menProducts, isLoading: loadingMen } = useGetFakeStoreProductsQuery({ category: "men's clothing" })
+  const { data: womenProducts, isLoading: loadingWomen } = useGetFakeStoreProductsQuery({ category: "women's clothing" })
+  
+  const isLoading = loadingMen || loadingWomen
+  const allProducts = [...(menProducts || []), ...(womenProducts || [])]
+  
+  // Filter products by selected category
+  const filteredProducts = selectedCategory === 'all' 
+    ? allProducts 
+    : selectedCategory === 'mens' 
+      ? menProducts || []
+      : womenProducts || []
 
   // Pagination
-  const itemsPerPage = 9
+  const itemsPerPage = 12
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedProducts = products?.slice(startIndex, endIndex) || []
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
 
-  const getPageTitle = () => {
-    if (searchQuery) return `Search Results for "${searchQuery}"`
-    if (category) return category.charAt(0).toUpperCase() + category.slice(1)
-    return 'All Products'
-  }
-
-  const getBreadcrumbs = () => {
-    const breadcrumbs = [{ name: 'Home', href: '/' }]
-    
-    if (searchQuery) {
-      breadcrumbs.push({ name: 'Search', href: '/search' })
-    } else if (category) {
-      breadcrumbs.push({ name: category.charAt(0).toUpperCase() + category.slice(1), href: `/category/${category}` })
-    } else {
-      breadcrumbs.push({ name: 'Shop', href: '/shop' })
-    }
-    
-    return breadcrumbs
-  }
+  const categories = [
+    { id: 'all', name: 'All Products', count: allProducts.length },
+    { id: 'mens', name: "Men's Clothing", count: menProducts?.length || 0 },
+    { id: 'womens', name: "Women's Clothing", count: womenProducts?.length || 0 }
+  ]
 
   const sortOptions = [
     'Most Popular',
@@ -87,8 +48,8 @@ const CategoryPage = () => {
   const ProductCard = ({ product }) => (
     <Link to={`/product/${product.id}`} className="group">
       <div className="bg-gray-100 rounded-lg overflow-hidden mb-3">
-        <img
-          src={product.image}
+        <img 
+          src={product.image} 
           alt={product.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -96,9 +57,9 @@ const CategoryPage = () => {
       <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
       <div className="flex items-center mb-2">
         {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            size={16}
+          <Star 
+            key={i} 
+            size={16} 
             className={`${i < Math.floor(product.rating?.rate || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
           />
         ))}
@@ -110,25 +71,15 @@ const CategoryPage = () => {
     </Link>
   )
 
-  const totalPages = Math.ceil((totalProducts || 0) / itemsPerPage)
-
   return (
     <div className="min-h-screen bg-white">
       {/* Breadcrumbs */}
       <div className="border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <nav className="flex items-center space-x-2 text-sm">
-            {getBreadcrumbs().map((breadcrumb, index) => (
-              <div key={breadcrumb.name} className="flex items-center">
-                {index > 0 && <span className="mx-2 text-gray-400">/</span>}
-                <Link 
-                  to={breadcrumb.href} 
-                  className={`${index === getBreadcrumbs().length - 1 ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                  {breadcrumb.name}
-                </Link>
-              </div>
-            ))}
+            <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-gray-900 font-medium">Shop</span>
           </nav>
         </div>
       </div>
@@ -146,9 +97,36 @@ const CategoryPage = () => {
           {/* Main Content */}
           <div className="flex-1 md:ml-6">
             {/* Header */}
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold mb-4">Shop All Products</h1>
+              <p className="text-gray-600 mb-6">
+                Discover our complete collection of high-quality clothing for men and women
+              </p>
+              
+              {/* Category Tabs */}
+              <div className="flex space-x-6 mb-6">
+                {categories.map((category) => (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      setSelectedCategory(category.id)
+                      setCurrentPage(1)
+                    }}
+                    className={`px-4 py-2 rounded-full border transition-colors ${
+                      selectedCategory === category.id
+                        ? 'bg-black text-white border-black'
+                        : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    {category.name} ({category.count})
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Controls */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
                 <button 
                   onClick={() => setIsFiltersOpen(true)}
                   className="md:hidden flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg"
@@ -160,7 +138,7 @@ const CategoryPage = () => {
               
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">
-                  Showing {((currentPage - 1) * 9) + 1}-{Math.min(currentPage * 9, totalProducts || 0)} of {totalProducts || 0} Products
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} Products
                 </span>
                 
                 <div className="flex items-center space-x-2">
@@ -182,9 +160,9 @@ const CategoryPage = () => {
             </div>
 
             {/* Products Grid */}
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(9)].map((_, i) => (
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(12)].map((_, i) => (
                   <div key={i} className="animate-pulse">
                     <div className="bg-gray-300 h-64 rounded-lg mb-3"></div>
                     <div className="bg-gray-300 h-4 rounded mb-2"></div>
@@ -193,9 +171,9 @@ const CategoryPage = () => {
                   </div>
                 ))}
               </div>
-            ) : paginatedProducts && paginatedProducts.length > 0 ? (
+            ) : paginatedProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -229,22 +207,6 @@ const CategoryPage = () => {
                       )
                     })}
                     
-                    {totalPages > 5 && (
-                      <>
-                        <span className="px-2">...</span>
-                        <button
-                          onClick={() => setCurrentPage(totalPages)}
-                          className={`px-3 py-2 text-sm border rounded ${
-                            currentPage === totalPages 
-                              ? 'bg-black text-white border-black' 
-                              : 'border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {totalPages}
-                        </button>
-                      </>
-                    )}
-                    
                     <button 
                       onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
@@ -257,7 +219,7 @@ const CategoryPage = () => {
               </>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-600">No products found.</p>
+                <p className="text-gray-600">No products found in this category.</p>
               </div>
             )}
           </div>
@@ -267,4 +229,4 @@ const CategoryPage = () => {
   )
 }
 
-export default CategoryPage
+export default ShopPage

@@ -1,13 +1,27 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
-import { Search, ShoppingCart, User, Menu, X } from 'lucide-react'
+import { useSelector, useDispatch } from 'react-redux'
+import { Search, ShoppingCart, User, Menu, X, ChevronDown } from 'lucide-react'
+import { initializeAuth } from '../store/slices/authSlice'
+import AuthModal from './AuthModal'
+import UserProfile from './UserProfile'
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [showUserDropdown, setShowUserDropdown] = useState(false)
   const navigate = useNavigate()
+  const dispatch = useDispatch()
+
   const cartItems = useSelector(state => state.cart.totalQuantity)
+  const { user, isAuthenticated } = useSelector(state => state.auth)
+
+  // Initialize auth on component mount
+  useEffect(() => {
+    dispatch(initializeAuth())
+  }, [dispatch])
 
   const handleSearch = (e) => {
     e.preventDefault()
@@ -88,9 +102,73 @@ const Header = () => {
                   </span>
                 )}
               </Link>
-              <button>
-                <User size={24} />
-              </button>
+              {isAuthenticated ? (
+                <div className="relative">
+                  <button
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-black text-white rounded-full flex items-center justify-center text-sm font-medium">
+                      {user?.firstName?.[0]}{user?.lastName?.[0]}
+                    </div>
+                    <ChevronDown size={16} className="text-gray-600" />
+                  </button>
+
+                  {showUserDropdown && (
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <div className="p-4 border-b border-gray-200">
+                        <p className="font-medium">{user?.firstName} {user?.lastName}</p>
+                        <p className="text-sm text-gray-600">{user?.email}</p>
+                      </div>
+                      <div className="py-2">
+                        <button
+                          onClick={() => {
+                            setShowUserDropdown(false)
+                            navigate('/account')
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          My Account
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsProfileOpen(true)
+                            setShowUserDropdown(false)
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          Edit Profile
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowUserDropdown(false)
+                            navigate('/cart')
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          My Orders
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowUserDropdown(false)
+                          }}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-50 transition-colors"
+                        >
+                          Wishlist
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <User size={24} />
+                  <span className="hidden sm:block text-sm">Sign In</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -121,9 +199,28 @@ const Header = () => {
           </div>
         )}
       </header>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
+
+      {/* User Profile Modal */}
+      <UserProfile
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
+
+      {/* Click outside handler for dropdown */}
+      {showUserDropdown && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowUserDropdown(false)}
+        />
+      )}
     </>
   )
 }
 
 export default Header
-

@@ -1,84 +1,52 @@
-import { useState, useEffect } from 'react'
-import { useParams, useSearchParams, Link } from 'react-router-dom'
-import { Filter, ChevronDown, Star } from 'lucide-react'
+import { useState } from 'react'
+import { Link } from 'react-router-dom'
+import { Filter, ChevronDown, Star, Award } from 'lucide-react'
 import { useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 import FiltersSidebar from '../components/FiltersSidebar'
 
-const CategoryPage = () => {
-  const { category } = useParams()
-  const [searchParams] = useSearchParams()
-  const searchQuery = searchParams.get('q')
-  
+const BrandsPage = () => {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false)
   const [sortBy, setSortBy] = useState('Most Popular')
   const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState({})
+  const [selectedBrand, setSelectedBrand] = useState('all')
 
-  // Determine which API call to make
-  const shouldSearch = !!searchQuery
-  const shouldFilterByCategory = !!category && category !== 'shop'
+  const { data: menProducts, isLoading: loadingMen } = useGetFakeStoreProductsQuery({ category: "men's clothing" })
+  const { data: womenProducts, isLoading: loadingWomen } = useGetFakeStoreProductsQuery({ category: "women's clothing" })
+  
+  const isLoading = loadingMen || loadingWomen
+  const allProducts = [...(menProducts || []), ...(womenProducts || [])]
+  
+  // Simulate brands by assigning random brand names to products
+  const brands = ['Fjallraven', 'Nike', 'Adidas', 'H&M', 'Zara', 'Uniqlo', 'Gap', 'Levi\'s']
+  const productsWithBrands = allProducts.map(product => ({
+    ...product,
+    brand: brands[Math.floor(Math.random() * brands.length)]
+  }))
 
-  // Map category names to API categories
-  const getCategoryName = (cat) => {
-    const categoryMap = {
-      'mens': "men's clothing",
-      'womens': "women's clothing",
-      'casual': "men's clothing",
-      'formal': "men's clothing",
-      'party': "women's clothing",
-      'gym': "men's clothing"
-    }
-    return categoryMap[cat] || cat
-  }
+  // Create brand statistics
+  const brandStats = brands.map(brand => ({
+    name: brand,
+    count: productsWithBrands.filter(p => p.brand === brand).length,
+    rating: (3.8 + Math.random() * 1.2).toFixed(1) // Random rating between 3.8-5.0
+  })).sort((a, b) => b.count - a.count)
 
-  const { data: productsData, isLoading } = useGetFakeStoreProductsQuery(
-    {
-      limit: 20,
-      category: shouldFilterByCategory ? getCategoryName(category) : ''
-    }
-  )
-
-  // For search, we'll filter products client-side since FakeStore API doesn't have search
-  const searchData = searchQuery ? {
-    products: productsData?.filter(product =>
-      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    ) || []
-  } : null
-
-  const products = shouldSearch ? searchData?.products : productsData
-  const totalProducts = products?.length || 0
-  const loading = isLoading
+  // Filter products by selected brand
+  const filteredProducts = selectedBrand === 'all' 
+    ? productsWithBrands 
+    : productsWithBrands.filter(p => p.brand === selectedBrand)
 
   // Pagination
-  const itemsPerPage = 9
+  const itemsPerPage = 12
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = startIndex + itemsPerPage
-  const paginatedProducts = products?.slice(startIndex, endIndex) || []
-
-  const getPageTitle = () => {
-    if (searchQuery) return `Search Results for "${searchQuery}"`
-    if (category) return category.charAt(0).toUpperCase() + category.slice(1)
-    return 'All Products'
-  }
-
-  const getBreadcrumbs = () => {
-    const breadcrumbs = [{ name: 'Home', href: '/' }]
-    
-    if (searchQuery) {
-      breadcrumbs.push({ name: 'Search', href: '/search' })
-    } else if (category) {
-      breadcrumbs.push({ name: category.charAt(0).toUpperCase() + category.slice(1), href: `/category/${category}` })
-    } else {
-      breadcrumbs.push({ name: 'Shop', href: '/shop' })
-    }
-    
-    return breadcrumbs
-  }
+  const paginatedProducts = filteredProducts.slice(startIndex, endIndex)
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
 
   const sortOptions = [
     'Most Popular',
-    'Newest',
+    'Brand A-Z',
+    'Brand Z-A',
     'Price: Low to High',
     'Price: High to Low',
     'Rating: High to Low'
@@ -86,31 +54,59 @@ const CategoryPage = () => {
 
   const ProductCard = ({ product }) => (
     <Link to={`/product/${product.id}`} className="group">
-      <div className="bg-gray-100 rounded-lg overflow-hidden mb-3">
-        <img
-          src={product.image}
+      <div className="bg-gray-100 rounded-lg overflow-hidden mb-3 relative">
+        <img 
+          src={product.image} 
           alt={product.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
+        {/* Brand Badge */}
+        <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded text-xs font-medium text-gray-700">
+          {product.brand}
+        </div>
       </div>
       <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
       <div className="flex items-center mb-2">
         {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            size={16}
+          <Star 
+            key={i} 
+            size={16} 
             className={`${i < Math.floor(product.rating?.rate || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
           />
         ))}
         <span className="text-sm text-gray-600 ml-2">{product.rating?.rate || 4}/5</span>
       </div>
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center justify-between">
         <span className="font-bold text-lg">${product.price}</span>
+        <span className="text-blue-600 text-sm font-medium">{product.brand}</span>
       </div>
     </Link>
   )
 
-  const totalPages = Math.ceil((totalProducts || 0) / itemsPerPage)
+  const BrandCard = ({ brand, count, rating, isSelected, onClick }) => (
+    <button
+      onClick={onClick}
+      className={`p-4 rounded-lg border text-left transition-all hover:shadow-md ${
+        isSelected 
+          ? 'border-black bg-black text-white' 
+          : 'border-gray-200 bg-white hover:border-gray-300'
+      }`}
+    >
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="font-bold text-lg">{brand}</h3>
+        <Award size={20} className={isSelected ? 'text-white' : 'text-gray-400'} />
+      </div>
+      <div className="flex items-center space-x-4 text-sm">
+        <span className={isSelected ? 'text-gray-200' : 'text-gray-600'}>
+          {count} products
+        </span>
+        <div className="flex items-center space-x-1">
+          <Star size={14} className={`${isSelected ? 'text-yellow-300' : 'text-yellow-400'} fill-current`} />
+          <span>{rating}</span>
+        </div>
+      </div>
+    </button>
+  )
 
   return (
     <div className="min-h-screen bg-white">
@@ -118,17 +114,9 @@ const CategoryPage = () => {
       <div className="border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <nav className="flex items-center space-x-2 text-sm">
-            {getBreadcrumbs().map((breadcrumb, index) => (
-              <div key={breadcrumb.name} className="flex items-center">
-                {index > 0 && <span className="mx-2 text-gray-400">/</span>}
-                <Link 
-                  to={breadcrumb.href} 
-                  className={`${index === getBreadcrumbs().length - 1 ? 'text-gray-900 font-medium' : 'text-gray-600 hover:text-gray-900'}`}
-                >
-                  {breadcrumb.name}
-                </Link>
-              </div>
-            ))}
+            <Link to="/" className="text-gray-600 hover:text-gray-900">Home</Link>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-gray-900 font-medium">Brands</span>
           </nav>
         </div>
       </div>
@@ -146,9 +134,46 @@ const CategoryPage = () => {
           {/* Main Content */}
           <div className="flex-1 md:ml-6">
             {/* Header */}
+            <div className="mb-8">
+              <div className="flex items-center space-x-3 mb-4">
+                <Award className="text-blue-500" size={32} />
+                <h1 className="text-3xl font-bold">Our Brands</h1>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Discover quality clothing from our curated selection of trusted brands
+              </p>
+              
+              {/* Brands Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 mb-8">
+                <BrandCard
+                  brand="All Brands"
+                  count={productsWithBrands.length}
+                  rating="4.2"
+                  isSelected={selectedBrand === 'all'}
+                  onClick={() => {
+                    setSelectedBrand('all')
+                    setCurrentPage(1)
+                  }}
+                />
+                {brandStats.slice(0, 7).map((brand) => (
+                  <BrandCard
+                    key={brand.name}
+                    brand={brand.name}
+                    count={brand.count}
+                    rating={brand.rating}
+                    isSelected={selectedBrand === brand.name}
+                    onClick={() => {
+                      setSelectedBrand(brand.name)
+                      setCurrentPage(1)
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Controls */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-4">
-                <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
                 <button 
                   onClick={() => setIsFiltersOpen(true)}
                   className="md:hidden flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg"
@@ -156,11 +181,18 @@ const CategoryPage = () => {
                   <Filter size={16} />
                   <span>Filters</span>
                 </button>
+                <div className="text-sm text-gray-600">
+                  {selectedBrand === 'all' ? (
+                    `��️ ${brands.length} brands • ${filteredProducts.length} products`
+                  ) : (
+                    `🏷️ ${selectedBrand} • ${filteredProducts.length} products`
+                  )}
+                </div>
               </div>
               
               <div className="flex items-center space-x-4">
                 <span className="text-sm text-gray-600">
-                  Showing {((currentPage - 1) * 9) + 1}-{Math.min(currentPage * 9, totalProducts || 0)} of {totalProducts || 0} Products
+                  Showing {startIndex + 1}-{Math.min(endIndex, filteredProducts.length)} of {filteredProducts.length} Products
                 </span>
                 
                 <div className="flex items-center space-x-2">
@@ -182,9 +214,9 @@ const CategoryPage = () => {
             </div>
 
             {/* Products Grid */}
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(9)].map((_, i) => (
+            {isLoading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(12)].map((_, i) => (
                   <div key={i} className="animate-pulse">
                     <div className="bg-gray-300 h-64 rounded-lg mb-3"></div>
                     <div className="bg-gray-300 h-4 rounded mb-2"></div>
@@ -193,9 +225,9 @@ const CategoryPage = () => {
                   </div>
                 ))}
               </div>
-            ) : paginatedProducts && paginatedProducts.length > 0 ? (
+            ) : paginatedProducts.length > 0 ? (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
@@ -229,22 +261,6 @@ const CategoryPage = () => {
                       )
                     })}
                     
-                    {totalPages > 5 && (
-                      <>
-                        <span className="px-2">...</span>
-                        <button
-                          onClick={() => setCurrentPage(totalPages)}
-                          className={`px-3 py-2 text-sm border rounded ${
-                            currentPage === totalPages 
-                              ? 'bg-black text-white border-black' 
-                              : 'border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {totalPages}
-                        </button>
-                      </>
-                    )}
-                    
                     <button 
                       onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                       disabled={currentPage === totalPages}
@@ -257,7 +273,7 @@ const CategoryPage = () => {
               </>
             ) : (
               <div className="text-center py-12">
-                <p className="text-gray-600">No products found.</p>
+                <p className="text-gray-600">No products found for this brand.</p>
               </div>
             )}
           </div>
@@ -267,4 +283,4 @@ const CategoryPage = () => {
   )
 }
 
-export default CategoryPage
+export default BrandsPage

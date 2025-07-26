@@ -1,9 +1,13 @@
 import { Link } from 'react-router-dom'
 import { Star, ArrowRight } from 'lucide-react'
-import { useGetProductsQuery } from '../store/api/dummyJsonApi'
+import { useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 
 const HomePage = () => {
-  const { data: productsData, isLoading } = useGetProductsQuery({ limit: 8 })
+  const { data: menProducts, isLoading: loadingMen } = useGetFakeStoreProductsQuery({ category: "men's clothing", limit: 4 })
+  const { data: womenProducts, isLoading: loadingWomen } = useGetFakeStoreProductsQuery({ category: "women's clothing", limit: 4 })
+
+  const isLoading = loadingMen || loadingWomen
+  const allProducts = [...(menProducts || []), ...(womenProducts || [])]
 
   const heroStats = [
     { number: '200+', label: 'International Brands' },
@@ -43,31 +47,25 @@ const HomePage = () => {
   const ProductCard = ({ product }) => (
     <Link to={`/product/${product.id}`} className="group">
       <div className="bg-gray-100 rounded-lg overflow-hidden mb-3">
-        <img 
-          src={product.thumbnail} 
+        <img
+          src={product.image}
           alt={product.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
       </div>
-      <h3 className="font-medium text-gray-900 mb-1">{product.title}</h3>
+      <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
       <div className="flex items-center mb-2">
         {[...Array(5)].map((_, i) => (
-          <Star 
-            key={i} 
-            size={16} 
-            className={`${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          <Star
+            key={i}
+            size={16}
+            className={`${i < Math.floor(product.rating?.rate || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
           />
         ))}
-        <span className="text-sm text-gray-600 ml-2">{product.rating}/5</span>
+        <span className="text-sm text-gray-600 ml-2">{product.rating?.rate || 4}/5</span>
       </div>
       <div className="flex items-center space-x-2">
         <span className="font-bold text-lg">${product.price}</span>
-        {product.discountPercentage > 0 && (
-          <>
-            <span className="text-gray-500 line-through">${(product.price * (1 + product.discountPercentage / 100)).toFixed(2)}</span>
-            <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">-{Math.round(product.discountPercentage)}%</span>
-          </>
-        )}
       </div>
     </Link>
   )
@@ -141,7 +139,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {productsData?.products?.slice(0, 4).map((product) => (
+              {allProducts.slice(0, 4).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -172,7 +170,7 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {productsData?.products?.slice(4, 8).map((product) => (
+              {allProducts.slice(4, 8).map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -258,4 +256,3 @@ const HomePage = () => {
 }
 
 export default HomePage
-
