@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, Link } from 'react-router-dom'
 import { Filter, ChevronDown, Star } from 'lucide-react'
-import { useGetProductsQuery, useSearchProductsQuery } from '../store/api/dummyJsonApi'
+import { useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 import FiltersSidebar from '../components/FiltersSidebar'
 
 const CategoryPage = () => {
@@ -18,23 +18,43 @@ const CategoryPage = () => {
   const shouldSearch = !!searchQuery
   const shouldFilterByCategory = !!category && category !== 'shop'
 
-  const { data: productsData, isLoading } = useGetProductsQuery(
-    { 
-      limit: 9, 
-      skip: (currentPage - 1) * 9,
-      category: shouldFilterByCategory ? category : ''
-    },
-    { skip: shouldSearch }
+  // Map category names to API categories
+  const getCategoryName = (cat) => {
+    const categoryMap = {
+      'mens': "men's clothing",
+      'womens': "women's clothing",
+      'casual': "men's clothing",
+      'formal': "men's clothing",
+      'party': "women's clothing",
+      'gym': "men's clothing"
+    }
+    return categoryMap[cat] || cat
+  }
+
+  const { data: productsData, isLoading } = useGetFakeStoreProductsQuery(
+    {
+      limit: 20,
+      category: shouldFilterByCategory ? getCategoryName(category) : ''
+    }
   )
 
-  const { data: searchData, isLoading: isSearchLoading } = useSearchProductsQuery(
-    searchQuery,
-    { skip: !shouldSearch }
-  )
+  // For search, we'll filter products client-side since FakeStore API doesn't have search
+  const searchData = searchQuery ? {
+    products: productsData?.filter(product =>
+      product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchQuery.toLowerCase())
+    ) || []
+  } : null
 
-  const products = shouldSearch ? searchData?.products : productsData?.products
-  const totalProducts = shouldSearch ? searchData?.total : productsData?.total
-  const loading = shouldSearch ? isSearchLoading : isLoading
+  const products = shouldSearch ? searchData?.products : productsData
+  const totalProducts = products?.length || 0
+  const loading = isLoading
+
+  // Pagination
+  const itemsPerPage = 9
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const paginatedProducts = products?.slice(startIndex, endIndex) || []
 
   const getPageTitle = () => {
     if (searchQuery) return `Search Results for "${searchQuery}"`
@@ -67,8 +87,8 @@ const CategoryPage = () => {
   const ProductCard = ({ product }) => (
     <Link to={`/product/${product.id}`} className="group">
       <div className="bg-gray-100 rounded-lg overflow-hidden mb-3">
-        <img 
-          src={product.thumbnail} 
+        <img
+          src={product.image}
           alt={product.title}
           className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-300"
         />
@@ -76,27 +96,21 @@ const CategoryPage = () => {
       <h3 className="font-medium text-gray-900 mb-1 line-clamp-2">{product.title}</h3>
       <div className="flex items-center mb-2">
         {[...Array(5)].map((_, i) => (
-          <Star 
-            key={i} 
-            size={16} 
-            className={`${i < Math.floor(product.rating) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
+          <Star
+            key={i}
+            size={16}
+            className={`${i < Math.floor(product.rating?.rate || 4) ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
           />
         ))}
-        <span className="text-sm text-gray-600 ml-2">{product.rating}/5</span>
+        <span className="text-sm text-gray-600 ml-2">{product.rating?.rate || 4}/5</span>
       </div>
       <div className="flex items-center space-x-2">
         <span className="font-bold text-lg">${product.price}</span>
-        {product.discountPercentage > 0 && (
-          <>
-            <span className="text-gray-500 line-through">${(product.price * (1 + product.discountPercentage / 100)).toFixed(2)}</span>
-            <span className="bg-red-100 text-red-600 px-2 py-1 rounded text-sm">-{Math.round(product.discountPercentage)}%</span>
-          </>
-        )}
       </div>
     </Link>
   )
 
-  const totalPages = Math.ceil((totalProducts || 0) / 9)
+  const totalPages = Math.ceil((totalProducts || 0) / itemsPerPage)
 
   return (
     <div className="min-h-screen bg-white">
@@ -182,7 +196,7 @@ const CategoryPage = () => {
             ) : products && products.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {products.map((product) => (
+                  {paginatedProducts.map((product) => (
                     <ProductCard key={product.id} product={product} />
                   ))}
                 </div>
@@ -254,4 +268,3 @@ const CategoryPage = () => {
 }
 
 export default CategoryPage
-
