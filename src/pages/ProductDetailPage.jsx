@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useDispatch } from 'react-redux'
 import { Star, Minus, Plus, Check } from 'lucide-react'
-import { useGetProductByIdQuery, useGetProductsQuery } from '../store/api/dummyJsonApi'
+import { useGetFakeStoreProductByIdQuery, useGetFakeStoreProductsQuery } from '../store/api/fakeStoreApi'
 import { addToCart } from '../store/slices/cartSlice'
 
 const ProductDetailPage = () => {
@@ -392,4 +392,3 @@ const ProductDetailPage = () => {
 }
 
 export default ProductDetailPage
-
