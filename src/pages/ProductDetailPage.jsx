@@ -365,7 +365,7 @@ const ProductDetailPage = () => {
         <div className="mt-16">
           <h2 className="text-2xl font-bold text-center mb-8">YOU MIGHT ALSO LIKE</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {relatedProducts?.products?.slice(0, 4).map((product) => (
+            {relatedProducts?.slice(0, 4).map((product) => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
